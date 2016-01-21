@@ -6,6 +6,7 @@ import java.util.List;
 import static java.lang.Math.abs;
 
 public class Customer {
+
     private String name;
     private List<Account> accounts;
 
@@ -16,6 +17,30 @@ public class Customer {
 
     public String getName() {
         return name;
+    }
+
+    /**
+     * @fromAcct: the account the money is from
+     * @toAcct: the destination account
+     * @transfer amount 
+     * This function implements an additional feature of
+     * transfer between customer accounts for the same customer.
+     * This function is synchronized in order to guarantee thread safety 
+     * Assumptions: amount must to positive and the destination account balance must not be negative
+     */
+    public synchronized void profileTransfer(Account fromAcct, Account toAcct, double amount) {
+      double fromAcctBlance = fromAcct.sumTransactions() ;
+        if (amount < 0 ) {
+            throw new IllegalArgumentException("transfer amount must be greater than zero");
+        } else if( fromAcctBlance < amount || fromAcctBlance < 0){
+            throw new IllegalArgumentException("balance cant not be negative");
+        } else {
+         // the withdrawal and deposit should be executed neither or both
+         // commit and rollback to be implemented so the withdrawal and the deposit become one atomic transaction 
+            fromAcct.withdraw(amount);
+            toAcct.deposit(amount);
+        }
+
     }
 
     public Customer openAccount(Account account) {
@@ -29,8 +54,9 @@ public class Customer {
 
     public double totalInterestEarned() {
         double total = 0;
-        for (Account a : accounts)
+        for (Account a : accounts) {
             total += a.interestEarned();
+        }
         return total;
     }
 
@@ -49,8 +75,8 @@ public class Customer {
     private String statementForAccount(Account a) {
         String s = "";
 
-       //Translate to pretty account type
-        switch(a.getAccountType()){
+        //Translate to pretty account type
+        switch (a.getAccountType()) {
             case Account.CHECKING:
                 s += "Checking Account\n";
                 break;
@@ -72,7 +98,7 @@ public class Customer {
         return s;
     }
 
-    private String toDollars(double d){
+    private String toDollars(double d) {
         return String.format("$%,.2f", abs(d));
     }
 }
